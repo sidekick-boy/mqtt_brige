@@ -1,0 +1,15 @@
+{
+  "name": "mqtt-bridge-sink",
+  "version": "1.0.0",
+  "description": "HTTP sink service that receives bridged MQTT business data and writes it to local txt files",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/selftest.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

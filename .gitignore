@@ -1,0 +1,16 @@
+# 运行时产生的业务数据日志
+data/
+test/.tmp-data/
+
+# 依赖
+node_modules/
+
+# Kiro 配置目录
+.kiro/
+.kiro */
+.kiro./
+kiro~1/
+
+# 系统/编辑器
+.DS_Store
+*.log
