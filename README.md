@@ -61,6 +61,33 @@ node server.js
 > 在规则引擎里，建议把「请求体」模板配成 `{"topic":"${topic}","payload":${payload}}`，
 > 这样 topic 和业务数据都能被完整记录。
 
+## 文件切分与自动清理
+
+为避免单个文件无限增大，服务采用两级切分 + 自动清理：
+
+1. **按天切分**：每天一个文件 `content-YYYY-MM-DD.txt`（`ROTATE_DAILY`）。
+2. **按大小滚动**：当天文件超过 `MAX_FILE_BYTES`（默认 10MB）时，自动把它归档为
+   `content-YYYY-MM-DD.txt.1`，更旧的依次顺延 `.2`、`.3`…… 数字越大越旧，新内容写回不带后缀的当前文件。
+3. **份数清理**：每个基名最多保留 `MAX_BACKUPS` 个文件（含当前），超出删最旧的 `.N`。
+4. **天数清理**：启动时清理修改时间超过 `RETENTION_DAYS` 天的旧日志。
+
+示例（目录内可能同时存在）：
+
+```
+content-2026-10-02.txt       <- 今天，正在写
+content-2026-10-02.txt.1     <- 今天，已写满归档（较新）
+content-2026-10-02.txt.2     <- 今天，更早的归档
+content-2026-10-01.txt       <- 昨天
+```
+
+想要更小的文件，调小 `MAX_FILE_BYTES`；想少占磁盘，调小 `MAX_BACKUPS` / `RETENTION_DAYS`。
+
+示例：单文件最大 5MB、每天最多留 20 个归档、只保留 7 天：
+
+```bash
+MAX_FILE_BYTES=5242880 MAX_BACKUPS=20 RETENTION_DAYS=7 node server.js
+```
+
 ## 配置（环境变量）
 
 | 变量 | 默认值 | 说明 |
@@ -71,6 +98,9 @@ node server.js
 | `LOG_DIR` | `./data` | 日志输出目录 |
 | `LOG_PREFIX` | `content` | 日志文件名前缀 |
 | `ROTATE_DAILY` | `true` | 是否按天分文件（false 则固定写 `content.txt`） |
+| `MAX_FILE_BYTES` | `10485760` | 单文件最大字节数(10MB)，超过则滚动归档；`0` 关闭 |
+| `MAX_BACKUPS` | `10` | 每个基名最多保留的文件数(含当前)，超出删最旧；`0` 不限制 |
+| `RETENTION_DAYS` | `30` | 清理超过 N 天的旧日志(按天滚动时生效)；`0` 不清理 |
 | `MAX_BODY_BYTES` | `5242880` | 单请求体最大字节数 |
 | `ECHO_CONSOLE` | `true` | 是否同时打印到控制台 |
 | `WITH_TIMESTAMP` | `true` | 每行是否带时间戳 |

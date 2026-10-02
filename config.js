@@ -37,6 +37,18 @@ module.exports = {
   // 是否按天分割日志文件（true: content-YYYY-MM-DD.txt；false: content.txt）
   rotateDaily: envBool('ROTATE_DAILY', true),
 
+  // 单个日志文件最大字节数，超过则滚动到新文件（.1 .2 ...）。
+  // 设为 0 表示不按大小滚动。默认 10MB。
+  maxFileBytes: envInt('MAX_FILE_BYTES', 10 * 1024 * 1024),
+
+  // 每个"基名"最多保留的滚动文件个数（含当前文件），超出则删除最旧的。
+  // 设为 0 表示不限制、不自动删除。默认 10 个。
+  maxBackups: envInt('MAX_BACKUPS', 10),
+
+  // 自动清理超过 N 天的旧日志文件（按天滚动时有效）。
+  // 设为 0 表示不按天数清理。默认 30 天。
+  retentionDays: envInt('RETENTION_DAYS', 30),
+
   // 单条请求体最大字节数，超过则拒绝（防止异常大包打爆内存）
   maxBodyBytes: envInt('MAX_BODY_BYTES', 5 * 1024 * 1024),
 
